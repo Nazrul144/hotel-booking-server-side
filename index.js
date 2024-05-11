@@ -36,12 +36,20 @@ async function run() {
     // await client.connect();
 
     //Getting data from database:
-    const dataCollection = client.db('hotelBooking').collection('featuredRoom')
+    const hotelBookingCollection = client.db('hotelBooking').collection('featuredRoom')
+    const roomCollection = client.db('hotelBooking').collection('roomCollection')
+    
 
     //Get six featuredRoom Data from db:
     app.get('/featuredRoom', async(req, res)=>{
-        const result = await dataCollection.find().toArray()
+        const result = await hotelBookingCollection.find().toArray()
         res.send(result)
+    })
+
+    //Get rooms Data from db:
+    app.get('/rooms', async(req,res)=>{
+      const result = await roomCollection.find().toArray()
+      res.send(result)
     })
 
 
