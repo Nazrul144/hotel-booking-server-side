@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000
 const app = express()
 
@@ -37,7 +37,7 @@ async function run() {
 
     //Getting data from database:
     const hotelBookingCollection = client.db('hotelBooking').collection('featuredRoom')
-    const roomCollection = client.db('hotelBooking').collection('roomCollection')
+    const roomCollection = client.db('hotelBooking').collection('rooms')
     
 
     //Get six featuredRoom Data from db:
@@ -46,9 +46,23 @@ async function run() {
         res.send(result)
     })
 
-    //Get rooms Data from db:
+    // Get rooms Data from db:
     app.get('/rooms', async(req,res)=>{
-      const result = await roomCollection.find().toArray()
+      const filter = req.query.filter
+      let query = {}
+      if(filter) query = {pricePerNight: parseInt(filter)}
+      const result = await roomCollection.find(query).toArray()
+      
+      res.send(result)
+    })
+
+   
+
+    //Get a single room Data from db:
+    app.get('/room/:id', async(req, res)=>{
+      const id = req.params.id
+      const query = {_id: new ObjectId(id)}
+      const result = await roomCollection.findOne(query)
       res.send(result)
     })
 
