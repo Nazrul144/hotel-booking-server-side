@@ -8,9 +8,9 @@ const app = express()
 
 //Middleware:
 const corsOption = {
-    origin:['http://localhost:5173'],
-    credential: true,
-    optionSuccessStatus: 200,
+  origin: ['http://localhost:5173'],
+  credential: true,
+  optionSuccessStatus: 200,
 }
 
 app.use(cors(corsOption))
@@ -39,45 +39,58 @@ async function run() {
     const hotelBookingCollection = client.db('hotelBooking').collection('featuredRoom')
     const roomCollection = client.db('hotelBooking').collection('rooms')
     const bookCollection = client.db('hotelBooking').collection('bookData')
-    
+    const reviewCollection = client.db('hotelBooking').collection('reviews')
+
 
     //Get six featuredRoom Data from db:
-    app.get('/featuredRoom', async(req, res)=>{
-        const result = await hotelBookingCollection.find().toArray()
-        res.send(result)
-    })
-
-    // Get rooms Data from db:
-    app.get('/rooms', async(req,res)=>{
-      const filter = req.query.filter
-      let query = {}
-      if(filter) query = {pricePerNight: parseInt(filter)}
-      const result = await roomCollection.find(query).toArray()
-      
+    app.get('/featuredRoom', async (req, res) => {
+      const result = await hotelBookingCollection.find().toArray()
       res.send(result)
     })
 
-   
+    // Get rooms Data from db:
+    app.get('/rooms', async (req, res) => {
+      const filter = req.query.filter
+      let query = {}
+      if (filter) query = { pricePerNight: parseInt(filter) }
+      const result = await roomCollection.find(query).toArray()
+
+      res.send(result)
+    })
+
+
 
     //Get a single room Data from db:
-    app.get('/room/:id', async(req, res)=>{
+    app.get('/room/:id', async (req, res) => {
       const id = req.params.id
-      const query = {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) }
       const result = await roomCollection.findOne(query)
       res.send(result)
     })
 
     //Save data to the database:
-    app.post('/bookData', async(req,res)=>{
-      const bookData = req.body 
+    app.post('/bookData', async (req, res) => {
+      const bookData = req.body
       const result = await bookCollection.insertOne(bookData)
       res.send(result)
     })
 
-   //Get all bookData booked by user:
-   app.get('rooms/:email', async(req, res)=>{
-    
-   })
+    //Get all bookData booked by user:
+    app.get('/bookData/:email', async (req, res) => {
+      const email = req.params.email
+      const query = { email: email }
+      const result = await bookCollection.find(query).toArray()
+      res.send(result)
+    })
+
+    // Save review data to the database:
+    app.post('/reviews', async (req, res) => {
+      const reviews = req.body
+      const result = await reviewCollection.insertOne(reviews)
+      res.send(result)
+    })
+
+    //Get all review data from 
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
@@ -92,10 +105,10 @@ run().catch(console.dir);
 
 
 
-app.get('/', (req, res)=>{
-    res.send('Server is running now!')
+app.get('/', (req, res) => {
+  res.send('Server is running now!')
 })
 
-app.listen(port, ()=>{
-    console.log(`The server is running at the port ${port}`);
+app.listen(port, () => {
+  console.log(`The server is running at the port ${port}`);
 })
