@@ -38,6 +38,7 @@ async function run() {
     //Getting data from database:
     const hotelBookingCollection = client.db('hotelBooking').collection('featuredRoom')
     const roomCollection = client.db('hotelBooking').collection('rooms')
+    const bookCollection = client.db('hotelBooking').collection('bookData')
     
 
     //Get six featuredRoom Data from db:
@@ -66,6 +67,17 @@ async function run() {
       res.send(result)
     })
 
+    //Save data to the database:
+    app.post('/bookData', async(req,res)=>{
+      const bookData = req.body 
+      const result = await bookCollection.insertOne(bookData)
+      res.send(result)
+    })
+
+   //Get all bookData booked by user:
+   app.get('rooms/:email', async(req, res)=>{
+    
+   })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
