@@ -90,10 +90,47 @@ async function run() {
       res.send(result)
     })
 
+    //Get a single featured Data from db:
+    app.get('/featuredRoom/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) }
+      const result = await roomCollection.findOne(query)
+      res.send(result)
+    })
+
+
     //Get all review data from 
-    app.get('/reviews', async (req, res) =>{
+    app.get('/reviews/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { bookId: id }
       const result = await reviewCollection.find().toArray()
       res.send(result)
+    })
+
+
+    // Route to cancel a booking from server:..........................
+    app.put('/bookData/:id', async (req, res) => {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      const result = await bookCollection.find(booking => booking._id === id);
+      if (!result) {
+        return res.status(404).json({ message: 'Booking not found' });
+      }
+      result.status = status;
+      res.send(result);
+    });
+
+    //Updating date of api:
+    
+
+    //Route to delete booking:
+    app.delete('/bookData/:id', async(req, res) => {
+      const id = req.params.id
+      const query = {_id:  new ObjectId(id)}
+      const result = bookCollection.deleteOne(query)
+      res.send(result)
+
     })
 
     // Send a ping to confirm a successful connection
