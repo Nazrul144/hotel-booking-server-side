@@ -8,7 +8,13 @@ const app = express()
 
 //Middleware:
 const corsOption = {
-  origin: ['http://localhost:5173'],
+  origin: [
+    'http://localhost:5173'
+
+    // 'https://hotel-booking-f7554.web.app',
+    // 'https://hotel-booking-f7554.firebaseapp.com'
+
+],
   credential: true,
   optionSuccessStatus: 200,
 }
@@ -40,6 +46,13 @@ async function run() {
     const roomCollection = client.db('hotelBooking').collection('rooms')
     const bookCollection = client.db('hotelBooking').collection('bookData')
     const reviewCollection = client.db('hotelBooking').collection('reviews')
+    const visitorsReviewCollection = client.db('hotelBooking').collection('visitorReviews')
+
+    //Get visitorsReviewsCollection from db:
+    app.get('/visitors', async(req, res)=>{
+      const result = await visitorsReviewCollection.find().toArray()
+      res.send(result)
+    })
 
 
     //Get six featuredRoom Data from db:
@@ -102,27 +115,27 @@ async function run() {
     //Get all review data from 
     app.get('/reviews/:id', async (req, res) => {
       const id = req.params.id
+      console.log(id);
       const query = { bookId: id }
-      const result = await reviewCollection.find().toArray()
+      const result = await reviewCollection.find(query).toArray()
       res.send(result)
     })
 
 
-    // Route to cancel a booking from server:..........................
-    app.put('/bookData/:id', async (req, res) => {
-      const { id } = req.params;
-      const { status } = req.body;
 
-      const result = await bookCollection.find(booking => booking._id === id);
-      if (!result) {
-        return res.status(404).json({ message: 'Booking not found' });
+
+    //Updating date for api:
+    app.patch('/bookData/:id', async(req, res)=>{
+      const id = req.params.id
+      const query = {_id: new ObjectId(id)}
+      const startDate = req.body
+      console.log(query);
+      const updateDoc = {
+        $set: startDate
       }
-      result.status = status;
-      res.send(result);
-    });
-
-    //Updating date of api:
-    
+      const result = await bookCollection.updateOne(query, updateDoc)
+      res.send(result)
+    })
 
     //Route to delete booking:
     app.delete('/bookData/:id', async(req, res) => {
@@ -133,6 +146,16 @@ async function run() {
 
     })
 
+    app.get('/sorting', async (req, res) => {
+      try {
+        const result = await reviewCollection.find({}).sort({ rating: -1 }).toArray();
+        res.json(result);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    });
+    
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
